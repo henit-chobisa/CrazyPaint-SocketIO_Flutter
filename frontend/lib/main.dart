@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend/paintPage.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(CrazyPaint());
 }
 
 class CrazyPaint extends StatelessWidget {
