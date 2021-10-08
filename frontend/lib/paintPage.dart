@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
-
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'Classes/DrawingModel.dart';
 import 'Classes/DrawingPainter.dart';
 
@@ -14,11 +14,28 @@ class paintPage extends StatefulWidget {
 class _paintPageState extends State<paintPage> {
   // ignore: deprecated_member_use
   List<DrawModel> pointsList = List();
-
+  io.Socket socket;
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
   GlobalKey key = GlobalKey();
   bool contiguous = true;
+
+  @override
+  void initState() {
+    ConnectIO();
+    super.initState();
+  }
+
+  void ConnectIO() async {
+    socket = io.io("http://127.0.0.1:2000/", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
+    socket.connect();
+    socket.on('connect', (data) => print("connected"));
+    print(socket.connected);
+  }
+
   @override
   void dispose() {
     pointsStream.close();

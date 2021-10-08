@@ -1,7 +1,6 @@
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
-
 import 'DrawingModel.dart';
 
 class DrawingPainter extends CustomPainter {
