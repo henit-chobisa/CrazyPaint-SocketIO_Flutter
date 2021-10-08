@@ -18,6 +18,7 @@ class _paintPageState extends State<paintPage> {
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
   GlobalKey key = GlobalKey();
+  bool contiguous = true;
   @override
   void dispose() {
     pointsStream.close();
@@ -52,8 +53,10 @@ class _paintPageState extends State<paintPage> {
           pointsStream.add(pointsList);
         },
         onPanEnd: (details) {
-          pointsList.add(null);
-          pointsStream.add(pointsList);
+          if (contiguous) {
+            pointsList.add(null);
+            pointsStream.add(pointsList);
+          }
         },
         child: Container(
           color: Colors.black,
@@ -67,6 +70,12 @@ class _paintPageState extends State<paintPage> {
                 );
               }),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          pointsList.add(null);
+          contiguous = !contiguous;
+        },
       ),
     );
   }
