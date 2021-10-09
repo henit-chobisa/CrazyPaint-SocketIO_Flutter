@@ -16,7 +16,7 @@ class customTextFeild extends StatelessWidget {
       padding: EdgeInsets.all(8.0),
       child: Container(
         height: 60.h,
-        width: double.maxFinite,
+        width: 360.w,
         decoration: BoxDecoration(
             color: Colors.grey.shade800,
             borderRadius: BorderRadius.circular(20.r)),

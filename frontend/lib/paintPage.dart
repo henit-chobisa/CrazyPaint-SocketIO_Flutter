@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:ffi';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/Classes/TransferModel.dart';
 import 'package:rxdart/rxdart.dart';
@@ -11,9 +12,11 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-class paintPage extends StatefulWidget {
-  const paintPage({Key key}) : super(key: key);
+import 'Classes/User.dart';
 
+class paintPage extends StatefulWidget {
+  paintPage({this.roomID});
+  String roomID;
   @override
   _paintPageState createState() => _paintPageState();
 }
@@ -23,16 +26,20 @@ enum SelectedMode { StrokeWidth, Opacity, Color }
 class _paintPageState extends State<paintPage> {
   // ignore: deprecated_member_use
   List<DrawModel> pointsList = List();
+  // ignore: deprecated_member_use
+  List<UserB> currentUsers = [];
   io.Socket socket;
   Color selectedColor = Colors.white;
   Color pickerColor = Colors.white;
   double strokeWidth = 3.0;
   bool showBottomList = false;
   double opacity = 1.0;
-
+  FirebaseAuth auth = FirebaseAuth.instance;
   SelectedMode selectedMode = SelectedMode.StrokeWidth;
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
+  // ignore: close_sinks
+  final userStream = BehaviorSubject<List<UserB>>();
   GlobalKey key = GlobalKey();
   bool contiguous = true;
   List<Color> colors = [
@@ -58,12 +65,38 @@ class _paintPageState extends State<paintPage> {
   }
 
   void ConnectIO() async {
-    socket = io.io("http://127.0.0.1:2000", <String, dynamic>{
+    socket = io
+        .io("http://127.0.0.1:2000/?roomID=${widget.roomID}", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
     socket.connect();
-    socket.on('connect', (data) => print("connected"));
+    socket.on('connect', (data) {
+      var userData = {
+        'email': auth.currentUser.email,
+        'userName': auth.currentUser.displayName,
+        'photoURL': auth.currentUser.photoURL
+      };
+      socket.emit('newUser', userData);
+    });
+
+    socket.on('getCurrentUsers', (data) {
+      print(data);
+      if (data != null) {
+        List<UserB> newUsers = [];
+        var userArray = data as List<dynamic>;
+        userArray.forEach((element) {
+          UserB newUser = UserB(
+              email: element['email'],
+              userName: element['userName'],
+              photoURL: element['photoURL']);
+          newUsers.add(newUser);
+        });
+        setState(() {
+          currentUsers = newUsers;
+        });
+      }
+    });
     socket.on('coordinates', (data) {
       var model = TransferModel.fromJson(data);
       var offset = Offset(model.dx, model.dy);
@@ -80,6 +113,18 @@ class _paintPageState extends State<paintPage> {
         pointsStream.add(pointsList);
       }
     });
+
+    socket.on('newUser', (data) {
+      print("new user");
+      var user = UserB(
+          email: data['email'],
+          userName: data['userName'],
+          photoURL: data['photoURL']);
+      setState(() {
+        currentUsers.add(user);
+      });
+    });
+
     print(socket.connected);
   }
 
@@ -264,65 +309,109 @@ class _paintPageState extends State<paintPage> {
               ),
             )),
       ),
-      body: GestureDetector(
-        onPanStart: (details) {
-          Paint paint = Paint()
-            ..strokeCap = StrokeCap.round
-            ..color = selectedColor.withOpacity(opacity)
-            ..isAntiAlias = true
-            ..strokeWidth = strokeWidth;
-          RenderBox renderBox = context.findRenderObject() as RenderBox;
-          DrawModel model = DrawModel(
-              offset: renderBox.globalToLocal(details.globalPosition),
-              paint: paint);
-          // emitCoordinates(model);
-          pointsList.add(model);
-          pointsStream.add(pointsList);
+      body: SafeArea(
+        child: Stack(
+          children: [
+            GestureDetector(
+              onPanStart: (details) {
+                Paint paint = Paint()
+                  ..strokeCap = StrokeCap.round
+                  ..color = selectedColor.withOpacity(opacity)
+                  ..isAntiAlias = true
+                  ..strokeWidth = strokeWidth;
+                RenderBox renderBox = context.findRenderObject() as RenderBox;
+                DrawModel model = DrawModel(
+                    offset: renderBox.globalToLocal(details.globalPosition),
+                    paint: paint);
+                // emitCoordinates(model);
+                pointsList.add(model);
+                pointsStream.add(pointsList);
 
-          emitCoordinates(TransferModel(
-              dx: details.globalPosition.dx,
-              dy: details.globalPosition.dy,
-              colorCode: selectedColor.withOpacity(opacity).hashCode,
-              StrokeWidth: strokeWidth));
-        },
-        onPanUpdate: (details) {
-          Paint paint = Paint()
-            ..strokeCap = StrokeCap.round
-            ..color = selectedColor.withOpacity(opacity)
-            ..isAntiAlias = true
-            ..strokeWidth = strokeWidth;
-          RenderBox renderBox = context.findRenderObject() as RenderBox;
-          DrawModel model = DrawModel(
-              offset: renderBox.globalToLocal(details.globalPosition),
-              paint: paint);
-          // emitCoordinates(model);
+                emitCoordinates(TransferModel(
+                    dx: details.globalPosition.dx,
+                    dy: details.globalPosition.dy,
+                    colorCode: selectedColor.withOpacity(opacity).hashCode,
+                    StrokeWidth: strokeWidth));
+              },
+              onPanUpdate: (details) {
+                Paint paint = Paint()
+                  ..strokeCap = StrokeCap.round
+                  ..color = selectedColor.withOpacity(opacity)
+                  ..isAntiAlias = true
+                  ..strokeWidth = strokeWidth;
+                RenderBox renderBox = context.findRenderObject() as RenderBox;
+                DrawModel model = DrawModel(
+                    offset: renderBox.globalToLocal(details.globalPosition),
+                    paint: paint);
+                // emitCoordinates(model);
 
-          pointsList.add(model);
-          pointsStream.add(pointsList);
-          emitCoordinates(TransferModel(
-              dx: details.globalPosition.dx,
-              dy: details.globalPosition.dy,
-              colorCode: selectedColor.withOpacity(opacity).hashCode,
-              StrokeWidth: strokeWidth));
-        },
-        onPanEnd: (details) {
-          if (contiguous) {
-            pointsList.add(null);
-            pointsStream.add(pointsList);
-          }
-          socket.emit('completed', contiguous);
-        },
-        child: Container(
-          color: Colors.black,
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: StreamBuilder<List<DrawModel>>(
-              stream: pointsStream,
-              builder: (context, snapshot) {
-                return CustomPaint(
-                  painter: DrawingPainter(pointsList: snapshot.data ?? []),
-                );
-              }),
+                pointsList.add(model);
+                pointsStream.add(pointsList);
+                emitCoordinates(TransferModel(
+                    dx: details.globalPosition.dx,
+                    dy: details.globalPosition.dy,
+                    colorCode: selectedColor.withOpacity(opacity).hashCode,
+                    StrokeWidth: strokeWidth));
+              },
+              onPanEnd: (details) {
+                if (contiguous) {
+                  pointsList.add(null);
+                  pointsStream.add(pointsList);
+                }
+                socket.emit('completed', contiguous);
+              },
+              child: Container(
+                color: Colors.black,
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: StreamBuilder<List<DrawModel>>(
+                    stream: pointsStream,
+                    builder: (context, snapshot) {
+                      return CustomPaint(
+                        painter:
+                            DrawingPainter(pointsList: snapshot.data ?? []),
+                      );
+                    }),
+              ),
+            ),
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Container(
+                      height: 70.h,
+                      width: 400.w,
+                      decoration: BoxDecoration(
+                        color: Colors.greenAccent,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: currentUsers.length,
+                            itemBuilder: (_, index) {
+                              return Container(
+                                height: 40.h,
+                                width: 40.w,
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20.r)),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  child: Image(
+                                    image: NetworkImage(
+                                        currentUsers.elementAt(index).photoURL),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              );
+                            }),
+                      )),
+                ),
+              ],
+            )
+          ],
         ),
       ),
     );
