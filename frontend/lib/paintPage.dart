@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
@@ -22,12 +24,12 @@ class _paintPageState extends State<paintPage> {
 
   @override
   void initState() {
-    ConnectIO();
     super.initState();
+    ConnectIO();
   }
 
   void ConnectIO() async {
-    socket = io.io("http://127.0.0.1:2000/", <String, dynamic>{
+    socket = io.io("http://127.0.0.1:2000", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
@@ -42,6 +44,10 @@ class _paintPageState extends State<paintPage> {
     super.dispose();
   }
 
+  void emitCoordinates(DrawModel model) {
+    socket.emit('coordinates', model.offset);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,10 +59,13 @@ class _paintPageState extends State<paintPage> {
           paint.strokeWidth = 3.0;
           paint.strokeCap = StrokeCap.round;
           RenderBox renderBox = context.findRenderObject() as RenderBox;
-          pointsList.add(DrawModel(
+          DrawModel model = DrawModel(
               offset: renderBox.globalToLocal(details.globalPosition),
-              paint: paint));
+              paint: paint);
+          // emitCoordinates(model);
+          pointsList.add(model);
           pointsStream.add(pointsList);
+          emitCoordinates(model);
         },
         onPanUpdate: (details) {
           Paint paint = Paint();
@@ -64,10 +73,13 @@ class _paintPageState extends State<paintPage> {
           paint.strokeWidth = 3.0;
           paint.strokeCap = StrokeCap.round;
           RenderBox renderBox = context.findRenderObject() as RenderBox;
-          pointsList.add(DrawModel(
+          DrawModel model = DrawModel(
               offset: renderBox.globalToLocal(details.globalPosition),
-              paint: paint));
+              paint: paint);
+          // emitCoordinates(model);
+          pointsList.add(model);
           pointsStream.add(pointsList);
+          emitCoordinates(model);
         },
         onPanEnd: (details) {
           if (contiguous) {
