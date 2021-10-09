@@ -10,7 +10,7 @@ const db = require('./config/Database');
 db();
 
 app.use(express.json());
-
+app.use('/login', require('./Routes/registerNewUser'));
 app.use(require('./Websockets')(io));
 
 server.listen(port,"0.0.0.0",() => { console.log(`Deployed on port ${port}`)});

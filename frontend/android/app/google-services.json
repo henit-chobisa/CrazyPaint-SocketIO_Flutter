@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "120183876795",
+    "project_id": "crazypaint-86086",
+    "storage_bucket": "crazypaint-86086.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:120183876795:android:40384b65151150653ccd9e",
+        "android_client_info": {
+          "package_name": "com.henitchobisa.frontend"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "120183876795-v42o9264eo4a6ht8m7aafa3fgmsjof9g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQcjCs0-6eKR-697jRFtjlKyk026f_LZw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "120183876795-v42o9264eo4a6ht8m7aafa3fgmsjof9g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
