@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/logoPage.dart';
 import 'package:frontend/paintPage.dart';
 
 void main() {
@@ -15,7 +16,7 @@ class CrazyPaint extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: paintPage(),
+      home: LogoPage(),
     );
   }
 }
