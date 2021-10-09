@@ -1,6 +1,7 @@
 import 'dart:async';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/paintPage.dart';
 import 'package:lottie/lottie.dart';
 
 import 'LoginPage.dart';
@@ -49,7 +50,7 @@ class _LogoPageState extends State<LogoPage> with TickerProviderStateMixin {
                   "Crazy Paint",
                   style: TextStyle(
                       color: Colors.white,
-                      fontSize: 50,
+                      fontSize: 50.sp,
                       fontWeight: FontWeight.bold),
                 ),
               ),

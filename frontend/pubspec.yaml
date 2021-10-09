@@ -29,6 +29,11 @@ dev_dependencies:
   json_serializable: 3.5.1
   flutter_colorpicker: any
   lottie: ^1.2.1
+  flutter_screenutil:
+  http:
+  firebase_auth:
+  google_sign_in:
+  shared_preferences:
 
 flutter:
 
@@ -36,4 +41,5 @@ flutter:
 
   assets:
     - Lottie/
+    - images/
 
