@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:frontend/LandingPage.dart';
 import 'package:lottie/lottie.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
@@ -20,6 +21,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
   AnimationController _controller;
+  String alert = "Continue wuth google";
 
   @override
   void initState() {
@@ -37,13 +39,22 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     var headers = {"Content-Type": "application/json"};
     var response = await http.post(Uri.parse("http://127.0.0.1:2000/login"),
         body: jsonEncode(body), headers: headers);
+    setState(() {
+      alert = "Continue with google";
+    });
     if (response.statusCode == 200) {
+      SharedPreferences.setMockInitialValues({});
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString("email", auth.currentUser.email).then((value) => Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => )));
+      await prefs.setString("email", auth.currentUser.email);
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (_) => LandingPage()));
     }
   }
 
   void requestLogin() async {
+    setState(() {
+      alert = "Loading...";
+    });
     final user = await GoogleSignIn().signIn();
     if (user != null) {
       final googleAuth = await user.authentication;
@@ -111,7 +122,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                           borderRadius: BorderRadius.circular(20.r)),
                       child: Center(
                         child: Text(
-                          "Continue with google",
+                          alert,
                           style: TextStyle(
                               color: Colors.black,
                               fontSize: 15.sp,
@@ -127,46 +138,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               ],
             )
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class customTextFeild extends StatelessWidget {
-  customTextFeild(
-      {this.hintText, this.obsText, this.controller, this.inputType});
-
-  String hintText;
-  bool obsText;
-  TextInputType inputType;
-  TextEditingController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Container(
-        height: 60.h,
-        width: double.maxFinite,
-        decoration: BoxDecoration(
-            color: Colors.grey.shade800,
-            borderRadius: BorderRadius.circular(20.r)),
-        child: Padding(
-          padding:
-              EdgeInsets.only(left: 16.w, right: 16.w, top: 5.h, bottom: 5.h),
-          child: TextField(
-            obscureText: obsText,
-            controller: controller,
-            keyboardType: inputType,
-            cursorColor: Colors.white,
-            textAlign: TextAlign.center,
-            decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: hintText,
-                hintStyle: TextStyle(color: Colors.grey.shade500)),
-            style: TextStyle(color: Colors.white, fontSize: 15.sp),
-          ),
         ),
       ),
     );
