@@ -10,6 +10,7 @@ class CrazyPaint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Crazy_Paint',
       theme: ThemeData(
         primarySwatch: Colors.blue,
