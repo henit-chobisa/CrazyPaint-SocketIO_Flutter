@@ -19,7 +19,6 @@ module.exports = function(io){
             const photoURL = data['photoURL'];
             const room = data['room'];
             const user = userJoin(socket.id, username, email, photoURL, room);
-            console.log(user);
             socket.join(user.room);
         
             // Send users and room info
@@ -27,6 +26,18 @@ module.exports = function(io){
               room: user.room,
               users: getRoomUsers(user.room)
             });
+
+            socket.on('disconnect', () => {
+                const user = userLeave(socket.id);
+            
+                if (user) {
+                  // Send users and room info
+                  io.to(user.room).emit('roomUsers', {
+                    room: user.room,
+                    users: getRoomUsers(user.room)
+                  });
+                }
+              });
 
             socket.on('coordinates', async function(message){
                 socket.in(user.room).broadcast.emit('coordinates', message);

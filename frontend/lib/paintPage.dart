@@ -83,8 +83,6 @@ class _paintPageState extends State<paintPage> {
     });
 
     socket.on('roomUsers', (data) {
-      print("getting users");
-      print(data);
       if (data != null) {
         List<UserB> newUsers = [];
         var userArray = data['users'] as List<dynamic>;
@@ -226,6 +224,7 @@ class _paintPageState extends State<paintPage> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -276,12 +275,16 @@ class _paintPageState extends State<paintPage> {
                         ),
                       ),
                       IconButton(
+                        onPressed: () {},
+                        icon: Icon(Icons.info_outline),
+                        color: Colors.black,
+                      ),
+                      IconButton(
                           icon: Icon(Icons.clear),
                           onPressed: () {
                             setState(() {
-                              // showBottomList = false;
-                              // pointsList.clear();
-                              Navigator.pop(context);
+                              showBottomList = false;
+                              pointsList.clear();
                             });
                           }),
                     ],
@@ -310,113 +313,117 @@ class _paintPageState extends State<paintPage> {
                             }),
                     visible: showBottomList,
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w, top: 15.h),
+                    child: Text(
+                      "Users in Room",
+                      style: TextStyle(fontSize: 12.sp),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                          height: 70.h,
+                          width: 320.w,
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            borderRadius: BorderRadius.circular(40.r),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: currentUsers.length,
+                                itemBuilder: (_, index) {
+                                  return Container(
+                                    height: 40.h,
+                                    width: 40.w,
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(20.r)),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(20.r),
+                                      child: Image(
+                                        image: NetworkImage(currentUsers
+                                            .elementAt(index)
+                                            .photoURL),
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          )),
+                      Icon(
+                        Icons.mic,
+                        color: Colors.black,
+                        size: 40.sp,
+                      )
+                    ],
+                  ),
                 ],
               ),
             )),
       ),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            GestureDetector(
-              onPanStart: (details) {
-                Paint paint = Paint()
-                  ..strokeCap = StrokeCap.round
-                  ..color = selectedColor.withOpacity(opacity)
-                  ..isAntiAlias = true
-                  ..strokeWidth = strokeWidth;
-                RenderBox renderBox = context.findRenderObject() as RenderBox;
-                DrawModel model = DrawModel(
-                    offset: renderBox.globalToLocal(details.globalPosition),
-                    paint: paint);
-                // emitCoordinates(model);
-                pointsList.add(model);
-                pointsStream.add(pointsList);
+      body: GestureDetector(
+        onPanStart: (details) {
+          Paint paint = Paint()
+            ..strokeCap = StrokeCap.round
+            ..color = selectedColor.withOpacity(opacity)
+            ..isAntiAlias = true
+            ..strokeWidth = strokeWidth;
+          RenderBox renderBox = context.findRenderObject() as RenderBox;
+          DrawModel model = DrawModel(
+              offset: renderBox.globalToLocal(details.globalPosition),
+              paint: paint);
+          // emitCoordinates(model);
+          pointsList.add(model);
+          pointsStream.add(pointsList);
 
-                emitCoordinates(TransferModel(
-                    dx: details.globalPosition.dx,
-                    dy: details.globalPosition.dy,
-                    colorCode: selectedColor.withOpacity(opacity).hashCode,
-                    StrokeWidth: strokeWidth));
-              },
-              onPanUpdate: (details) {
-                Paint paint = Paint()
-                  ..strokeCap = StrokeCap.round
-                  ..color = selectedColor.withOpacity(opacity)
-                  ..isAntiAlias = true
-                  ..strokeWidth = strokeWidth;
-                RenderBox renderBox = context.findRenderObject() as RenderBox;
-                DrawModel model = DrawModel(
-                    offset: renderBox.globalToLocal(details.globalPosition),
-                    paint: paint);
-                // emitCoordinates(model);
+          emitCoordinates(TransferModel(
+              dx: details.globalPosition.dx,
+              dy: details.globalPosition.dy,
+              colorCode: selectedColor.withOpacity(opacity).hashCode,
+              StrokeWidth: strokeWidth));
+        },
+        onPanUpdate: (details) {
+          Paint paint = Paint()
+            ..strokeCap = StrokeCap.round
+            ..color = selectedColor.withOpacity(opacity)
+            ..isAntiAlias = true
+            ..strokeWidth = strokeWidth;
+          RenderBox renderBox = context.findRenderObject() as RenderBox;
+          DrawModel model = DrawModel(
+              offset: renderBox.globalToLocal(details.globalPosition),
+              paint: paint);
+          // emitCoordinates(model);
 
-                pointsList.add(model);
-                pointsStream.add(pointsList);
-                emitCoordinates(TransferModel(
-                    dx: details.globalPosition.dx,
-                    dy: details.globalPosition.dy,
-                    colorCode: selectedColor.withOpacity(opacity).hashCode,
-                    StrokeWidth: strokeWidth));
-              },
-              onPanEnd: (details) {
-                if (contiguous) {
-                  pointsList.add(null);
-                  pointsStream.add(pointsList);
-                }
-                socket.emit('completed', contiguous);
-              },
-              child: Container(
-                color: Colors.black,
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: StreamBuilder<List<DrawModel>>(
-                    stream: pointsStream,
-                    builder: (context, snapshot) {
-                      return CustomPaint(
-                        painter:
-                            DrawingPainter(pointsList: snapshot.data ?? []),
-                      );
-                    }),
-              ),
-            ),
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      height: 70.h,
-                      width: 400.w,
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: currentUsers.length,
-                            itemBuilder: (_, index) {
-                              return Container(
-                                height: 40.h,
-                                width: 40.w,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20.r)),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  child: Image(
-                                    image: NetworkImage(
-                                        currentUsers.elementAt(index).photoURL),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            }),
-                      )),
-                ),
-              ],
-            )
-          ],
+          pointsList.add(model);
+          pointsStream.add(pointsList);
+          emitCoordinates(TransferModel(
+              dx: details.globalPosition.dx,
+              dy: details.globalPosition.dy,
+              colorCode: selectedColor.withOpacity(opacity).hashCode,
+              StrokeWidth: strokeWidth));
+        },
+        onPanEnd: (details) {
+          if (contiguous) {
+            pointsList.add(null);
+            pointsStream.add(pointsList);
+          }
+          socket.emit('completed', contiguous);
+        },
+        child: Container(
+          color: Colors.black,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: StreamBuilder<List<DrawModel>>(
+              stream: pointsStream,
+              builder: (context, snapshot) {
+                return CustomPaint(
+                  painter: DrawingPainter(pointsList: snapshot.data ?? []),
+                );
+              }),
         ),
       ),
     );
