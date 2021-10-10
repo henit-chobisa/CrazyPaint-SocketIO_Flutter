@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:ffi';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +6,6 @@ import 'package:rxdart/rxdart.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'Classes/DrawingModel.dart';
 import 'Classes/DrawingPainter.dart';
-import 'dart:io';
 import 'dart:ui';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
@@ -72,23 +69,24 @@ class _paintPageState extends State<paintPage> {
     });
     socket.connect();
     socket.on('connect', (data) {
+      print("connected");
       var userData = {
         'email': auth.currentUser.email,
-        'userName': auth.currentUser.displayName,
-        'photoURL': auth.currentUser.photoURL
+        'username': auth.currentUser.displayName,
+        'photoURL': auth.currentUser.photoURL,
+        'room': widget.roomID
       };
-      socket.emit('newUser', userData);
+      socket.emit('joinRoom', userData);
     });
 
-    socket.on('getCurrentUsers', (data) {
-      print(data);
+    socket.on('roomUsers', (data) {
       if (data != null) {
         List<UserB> newUsers = [];
-        var userArray = data as List<dynamic>;
+        var userArray = data['users'] as List<dynamic>;
         userArray.forEach((element) {
           UserB newUser = UserB(
               email: element['email'],
-              userName: element['userName'],
+              userName: element['username'],
               photoURL: element['photoURL']);
           newUsers.add(newUser);
         });
@@ -114,22 +112,13 @@ class _paintPageState extends State<paintPage> {
       }
     });
 
-    socket.on('newUser', (data) {
-      print("new user");
-      var user = UserB(
-          email: data['email'],
-          userName: data['userName'],
-          photoURL: data['photoURL']);
-      setState(() {
-        currentUsers.add(user);
-      });
-    });
-
     print(socket.connected);
   }
 
   @override
   void dispose() {
+    socket.disconnect();
+    socket.dispose();
     pointsStream.close();
     super.dispose();
   }
@@ -222,10 +211,19 @@ class _paintPageState extends State<paintPage> {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
+                      IconButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          icon: Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.black,
+                          )),
                       IconButton(
                           icon: Icon(Icons.album),
                           onPressed: () {
@@ -272,6 +270,84 @@ class _paintPageState extends State<paintPage> {
                         ),
                       ),
                       IconButton(
+                        onPressed: () {
+                          showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                    backgroundColor: Colors.greenAccent,
+                                    title: Text(
+                                      "Room Information",
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 12.sp),
+                                    ),
+                                    content: SingleChildScrollView(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Current Room ID",
+                                            style: TextStyle(
+                                                fontSize: 14.sp,
+                                                color: Colors.black),
+                                          ),
+                                          SizedBox(
+                                            height: 10.h,
+                                          ),
+                                          Center(
+                                            child: Text(
+                                              widget.roomID,
+                                              style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            height: 10.h,
+                                          ),
+                                          Text("User Information",
+                                              style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  color: Colors.black)),
+                                          SizedBox(
+                                            height: 10.h,
+                                          ),
+                                          Container(
+                                            height: 300.h,
+                                            width: double.maxFinite,
+                                            child: ListView.builder(
+                                                scrollDirection: Axis.vertical,
+                                                shrinkWrap: true,
+                                                itemCount: currentUsers.length,
+                                                itemBuilder: (_, index) {
+                                                  print(currentUsers
+                                                      .elementAt(0)
+                                                      .userName);
+                                                  return AttendeeBox(
+                                                    name: currentUsers
+                                                        .elementAt(index)
+                                                        .userName,
+                                                    email: currentUsers
+                                                        .elementAt(index)
+                                                        .email,
+                                                    photoURL: currentUsers
+                                                        .elementAt(index)
+                                                        .photoURL,
+                                                  );
+                                                }),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  ));
+                        },
+                        icon: Icon(Icons.info_outline),
+                        color: Colors.black,
+                      ),
+                      IconButton(
                           icon: Icon(Icons.clear),
                           onPressed: () {
                             setState(() {
@@ -305,111 +381,177 @@ class _paintPageState extends State<paintPage> {
                             }),
                     visible: showBottomList,
                   ),
+                  Padding(
+                    padding: EdgeInsets.only(left: 16.w, top: 15.h),
+                    child: Text(
+                      "Users in Room",
+                      style: TextStyle(fontSize: 12.sp),
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                          height: 70.h,
+                          width: 320.w,
+                          decoration: BoxDecoration(
+                            color: Colors.greenAccent,
+                            borderRadius: BorderRadius.circular(40.r),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: ListView.builder(
+                                shrinkWrap: true,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: currentUsers.length,
+                                itemBuilder: (_, index) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(right: 3.w),
+                                    child: Container(
+                                      height: 40.h,
+                                      width: 40.w,
+                                      decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(20.r)),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(20.r),
+                                        child: Image(
+                                          image: NetworkImage(currentUsers
+                                              .elementAt(index)
+                                              .photoURL),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }),
+                          )),
+                      Icon(
+                        Icons.mic,
+                        color: Colors.black,
+                        size: 40.sp,
+                      )
+                    ],
+                  ),
                 ],
               ),
             )),
       ),
-      body: SafeArea(
-        child: Stack(
+      body: GestureDetector(
+        onPanStart: (details) {
+          Paint paint = Paint()
+            ..strokeCap = StrokeCap.round
+            ..color = selectedColor.withOpacity(opacity)
+            ..isAntiAlias = true
+            ..strokeWidth = strokeWidth;
+          RenderBox renderBox = context.findRenderObject() as RenderBox;
+          DrawModel model = DrawModel(
+              offset: renderBox.globalToLocal(details.globalPosition),
+              paint: paint);
+          // emitCoordinates(model);
+          pointsList.add(model);
+          pointsStream.add(pointsList);
+
+          emitCoordinates(TransferModel(
+              dx: details.globalPosition.dx,
+              dy: details.globalPosition.dy,
+              colorCode: selectedColor.withOpacity(opacity).hashCode,
+              StrokeWidth: strokeWidth));
+        },
+        onPanUpdate: (details) {
+          Paint paint = Paint()
+            ..strokeCap = StrokeCap.round
+            ..color = selectedColor.withOpacity(opacity)
+            ..isAntiAlias = true
+            ..strokeWidth = strokeWidth;
+          RenderBox renderBox = context.findRenderObject() as RenderBox;
+          DrawModel model = DrawModel(
+              offset: renderBox.globalToLocal(details.globalPosition),
+              paint: paint);
+          // emitCoordinates(model);
+
+          pointsList.add(model);
+          pointsStream.add(pointsList);
+          emitCoordinates(TransferModel(
+              dx: details.globalPosition.dx,
+              dy: details.globalPosition.dy,
+              colorCode: selectedColor.withOpacity(opacity).hashCode,
+              StrokeWidth: strokeWidth));
+        },
+        onPanEnd: (details) {
+          if (contiguous) {
+            pointsList.add(null);
+            pointsStream.add(pointsList);
+          }
+          socket.emit('completed', contiguous);
+        },
+        child: Container(
+          color: Colors.black,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
+          child: StreamBuilder<List<DrawModel>>(
+              stream: pointsStream,
+              builder: (context, snapshot) {
+                return CustomPaint(
+                  painter: DrawingPainter(pointsList: snapshot.data ?? []),
+                );
+              }),
+        ),
+      ),
+    );
+  }
+}
+
+class AttendeeBox extends StatelessWidget {
+  AttendeeBox({this.name, this.email, this.photoURL});
+
+  final String name;
+  final String photoURL;
+  final String email;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(3.0),
+      child: Container(
+        width: double.maxFinite,
+        height: 50.h,
+        decoration: BoxDecoration(
+            color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+        child: Row(
           children: [
-            GestureDetector(
-              onPanStart: (details) {
-                Paint paint = Paint()
-                  ..strokeCap = StrokeCap.round
-                  ..color = selectedColor.withOpacity(opacity)
-                  ..isAntiAlias = true
-                  ..strokeWidth = strokeWidth;
-                RenderBox renderBox = context.findRenderObject() as RenderBox;
-                DrawModel model = DrawModel(
-                    offset: renderBox.globalToLocal(details.globalPosition),
-                    paint: paint);
-                // emitCoordinates(model);
-                pointsList.add(model);
-                pointsStream.add(pointsList);
-
-                emitCoordinates(TransferModel(
-                    dx: details.globalPosition.dx,
-                    dy: details.globalPosition.dy,
-                    colorCode: selectedColor.withOpacity(opacity).hashCode,
-                    StrokeWidth: strokeWidth));
-              },
-              onPanUpdate: (details) {
-                Paint paint = Paint()
-                  ..strokeCap = StrokeCap.round
-                  ..color = selectedColor.withOpacity(opacity)
-                  ..isAntiAlias = true
-                  ..strokeWidth = strokeWidth;
-                RenderBox renderBox = context.findRenderObject() as RenderBox;
-                DrawModel model = DrawModel(
-                    offset: renderBox.globalToLocal(details.globalPosition),
-                    paint: paint);
-                // emitCoordinates(model);
-
-                pointsList.add(model);
-                pointsStream.add(pointsList);
-                emitCoordinates(TransferModel(
-                    dx: details.globalPosition.dx,
-                    dy: details.globalPosition.dy,
-                    colorCode: selectedColor.withOpacity(opacity).hashCode,
-                    StrokeWidth: strokeWidth));
-              },
-              onPanEnd: (details) {
-                if (contiguous) {
-                  pointsList.add(null);
-                  pointsStream.add(pointsList);
-                }
-                socket.emit('completed', contiguous);
-              },
-              child: Container(
-                color: Colors.black,
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                child: StreamBuilder<List<DrawModel>>(
-                    stream: pointsStream,
-                    builder: (context, snapshot) {
-                      return CustomPaint(
-                        painter:
-                            DrawingPainter(pointsList: snapshot.data ?? []),
-                      );
-                    }),
-              ),
+            ClipRRect(
+                borderRadius: BorderRadius.circular(20.r),
+                child: Image(
+                  image: NetworkImage(photoURL),
+                  height: 40.h,
+                  width: 40.h,
+                )),
+            SizedBox(
+              width: 10.w,
             ),
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                      height: 70.h,
-                      width: 400.w,
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: currentUsers.length,
-                            itemBuilder: (_, index) {
-                              return Container(
-                                height: 40.h,
-                                width: 40.w,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20.r)),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  child: Image(
-                                    image: NetworkImage(
-                                        currentUsers.elementAt(index).photoURL),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              );
-                            }),
-                      )),
-                ),
-              ],
+            Padding(
+              padding: EdgeInsets.all(7.sp),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp),
+                  ),
+                  Text(
+                    email,
+                    style: TextStyle(
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10.sp),
+                  ),
+                ],
+              ),
             )
           ],
         ),

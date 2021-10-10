@@ -193,9 +193,12 @@ class _LandingPageState extends State<LandingPage> {
                     decoration: BoxDecoration(
                         color: Colors.transparent,
                         borderRadius: BorderRadius.circular(20.r)),
-                    child: Image(
-                      image: NetworkImage(auth.currentUser.photoURL),
-                      fit: BoxFit.cover,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: Image(
+                        image: NetworkImage(auth.currentUser.photoURL),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   )
                 ],
