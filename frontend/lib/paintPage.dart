@@ -7,6 +7,10 @@ import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'Classes/DrawingModel.dart';
 import 'Classes/DrawingPainter.dart';
 import 'dart:ui';
+import 'dart:async';
+
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 import 'Classes/User.dart';
@@ -46,11 +50,48 @@ class _paintPageState extends State<paintPage> {
     Colors.amber,
     Colors.black
   ];
+  var APP_ID = '08478a3f085f4cbdb8c246d288dfb81b';
+  var Token =
+      '00608478a3f085f4cbdb8c246d288dfb81bIABjGMWvy45HojYGKQFmhreTNJ6zBNjMKErjZ2xugzWF/hw69csAAAAAEACTqYr9QG9kYQEAAQA/b2Rh';
+
+  bool _joined = false;
+  int _remoteUid = 0;
+  bool _switch = false;
 
   @override
   void initState() {
     super.initState();
+    initPlatformState();
     ConnectIO();
+  }
+
+  Future<void> initPlatformState() async {
+    // Get microphone permission
+    await [Permission.microphone].request();
+    // Create RTC client instance
+    RtcEngineContext context = RtcEngineContext(APP_ID);
+    var engine = await RtcEngine.createWithContext(context);
+    // Define event handling logic
+    engine.setEventHandler(RtcEngineEventHandler(
+        joinChannelSuccess: (String channel, int uid, int elapsed) {
+      print('joinChannelSuccess ${channel} ${uid}');
+      setState(() {
+        _joined = true;
+      });
+    }, userJoined: (int uid, int elapsed) {
+      print('userJoined ${uid}');
+      setState(() {
+        _remoteUid = uid;
+      });
+    }, userOffline: (int uid, UserOfflineReason reason) {
+      print('userOffline ${uid}');
+      setState(() {
+        _remoteUid = 0;
+      });
+    }));
+    engine.enableLocalAudio(true);
+    // Join channel with channel name as 123
+    await engine.joinChannel(Token, '12345', null, 0);
   }
 
   Color getContigousStatus() {
@@ -62,11 +103,12 @@ class _paintPageState extends State<paintPage> {
   }
 
   void ConnectIO() async {
-    socket = io
-        .io("http://127.0.0.1:2000/?roomID=${widget.roomID}", <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": false,
-    });
+    socket = io.io(
+        "https://crazypaint.herokuapp.com/?roomID=${widget.roomID}",
+        <String, dynamic>{
+          "transports": ["websocket"],
+          "autoConnect": false,
+        });
     socket.connect();
     socket.on('connect', (data) {
       print("connected");

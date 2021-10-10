@@ -11,7 +11,7 @@ environment:
   sdk: ">=2.11.0 <3.0.0"
 
 dependencies:
-  json_annotation: 3.1.1
+  json_annotation: ^4.0.0
   flutter:
     sdk: flutter
 
@@ -26,7 +26,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   build_runner:
-  json_serializable: 3.5.1
+  json_serializable:
   flutter_colorpicker: any
   lottie: ^1.2.1
   flutter_screenutil:
@@ -34,6 +34,8 @@ dev_dependencies:
   firebase_auth:
   google_sign_in:
   shared_preferences:
+  agora_rtc_engine: ^4.0.7
+  permission_handler:
 
 flutter:
 
