@@ -37,8 +37,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       "userName": auth.currentUser.displayName
     };
     var headers = {"Content-Type": "application/json"};
-    var response = await http.post(Uri.parse("http://127.0.0.1:2000/login"),
-        body: jsonEncode(body), headers: headers);
+    var response = await http.post(
+        Uri.parse("https://crazypaint.herokuapp.com/login"),
+        body: jsonEncode(body),
+        headers: headers);
     setState(() {
       alert = "Continue with google";
     });
