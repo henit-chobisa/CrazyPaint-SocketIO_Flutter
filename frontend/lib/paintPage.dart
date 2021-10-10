@@ -72,19 +72,22 @@ class _paintPageState extends State<paintPage> {
     });
     socket.connect();
     socket.on('connect', (data) {
+      print("connected");
       var userData = {
         'email': auth.currentUser.email,
-        'userName': auth.currentUser.displayName,
-        'photoURL': auth.currentUser.photoURL
+        'username': auth.currentUser.displayName,
+        'photoURL': auth.currentUser.photoURL,
+        'room': widget.roomID
       };
-      socket.emit('newUser', userData);
+      socket.emit('joinRoom', userData);
     });
 
-    socket.on('getCurrentUsers', (data) {
+    socket.on('roomUsers', (data) {
+      print("getting users");
       print(data);
       if (data != null) {
         List<UserB> newUsers = [];
-        var userArray = data as List<dynamic>;
+        var userArray = data['users'] as List<dynamic>;
         userArray.forEach((element) {
           UserB newUser = UserB(
               email: element['email'],
@@ -115,7 +118,6 @@ class _paintPageState extends State<paintPage> {
     });
 
     socket.on('newUser', (data) {
-      print("new user");
       var user = UserB(
           email: data['email'],
           userName: data['userName'],
@@ -130,6 +132,8 @@ class _paintPageState extends State<paintPage> {
 
   @override
   void dispose() {
+    socket.disconnect();
+    socket.dispose();
     pointsStream.close();
     super.dispose();
   }
@@ -275,8 +279,9 @@ class _paintPageState extends State<paintPage> {
                           icon: Icon(Icons.clear),
                           onPressed: () {
                             setState(() {
-                              showBottomList = false;
-                              pointsList.clear();
+                              // showBottomList = false;
+                              // pointsList.clear();
+                              Navigator.pop(context);
                             });
                           }),
                     ],
