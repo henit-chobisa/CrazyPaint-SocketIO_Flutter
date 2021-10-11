@@ -16,10 +16,9 @@ class customTextFeild extends StatelessWidget {
       padding: EdgeInsets.all(8.0),
       child: Container(
         height: 60.h,
-        width: 360.w,
+        width: 400.w,
         decoration: BoxDecoration(
-            color: Colors.grey.shade800,
-            borderRadius: BorderRadius.circular(20.r)),
+            color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
         child: Padding(
           padding:
               EdgeInsets.only(left: 16.w, right: 16.w, top: 5.h, bottom: 5.h),
@@ -27,13 +26,13 @@ class customTextFeild extends StatelessWidget {
             obscureText: obsText,
             controller: controller,
             keyboardType: inputType,
-            cursorColor: Colors.white,
+            cursorColor: Colors.black,
             textAlign: TextAlign.center,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: hintText,
                 hintStyle: TextStyle(color: Colors.grey.shade500)),
-            style: TextStyle(color: Colors.white, fontSize: 15.sp),
+            style: TextStyle(color: Colors.black, fontSize: 15.sp),
           ),
         ),
       ),

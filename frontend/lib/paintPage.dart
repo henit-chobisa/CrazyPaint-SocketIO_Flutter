@@ -59,7 +59,7 @@ class _paintPageState extends State<paintPage> {
     Colors.green,
     Colors.blue,
     Colors.amber,
-    Colors.black
+    Colors.purpleAccent
   ];
   var APP_ID = '08478a3f085f4cbdb8c246d288dfb81b';
   bool soundOn = true;
@@ -108,12 +108,15 @@ class _paintPageState extends State<paintPage> {
     RtcEngineContext context = RtcEngineContext(APP_ID);
     engine = await RtcEngine.createWithContext(context);
     var uid = Random().nextInt(100000);
+    await engine.setChannelProfile(ChannelProfile.Game);
     engine.setEventHandler(RtcEngineEventHandler(
         joinChannelSuccess: (String channel, int uid, int elapsed) {
       print('joinChannelSuccess ${channel} ${uid}');
       setState(() {
         _joined = true;
-        setState(() {
+        setState(() async {
+          await engine.enableLocalAudio(true);
+          await engine.setEnableSpeakerphone(true);
           MicVisible = true;
         });
       });
@@ -129,13 +132,12 @@ class _paintPageState extends State<paintPage> {
       });
     }, tokenPrivilegeWillExpire: (value) async {
       print('token will expire');
-      await fetchRtcToken(widget.roomID, uid, 'SUBSCRIBER');
+      await fetchRtcToken(widget.roomID, uid, 'publisher');
       await engine.joinChannel(Token, widget.roomID, null, uid);
     }));
 
-    await fetchRtcToken(widget.roomID, uid, 'SUBSCRIBER');
+    await fetchRtcToken(widget.roomID, uid, 'publisher');
 
-    engine.enableLocalAudio(true);
     // Join channel with channel name as 123
     print(Token);
     await engine.joinChannel(Token, widget.roomID, null, uid);
@@ -296,8 +298,7 @@ class _paintPageState extends State<paintPage> {
         child: Container(
             padding: const EdgeInsets.only(left: 8.0, right: 8.0),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50.0),
-                color: Colors.greenAccent),
+                borderRadius: BorderRadius.circular(50.0), color: Colors.white),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -485,7 +486,7 @@ class _paintPageState extends State<paintPage> {
                           height: 70.h,
                           width: 280.w,
                           decoration: BoxDecoration(
-                            color: Colors.greenAccent,
+                            color: Colors.white,
                             borderRadius: BorderRadius.circular(40.r),
                           ),
                           child: Padding(

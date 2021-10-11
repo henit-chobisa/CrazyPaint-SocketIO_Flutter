@@ -17,13 +17,27 @@ class LogoPage extends StatefulWidget {
 
 class _LogoPageState extends State<LogoPage> with TickerProviderStateMixin {
   AnimationController _controller;
+  bool LoggedIn = false;
+
+  Future<void> check() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var mail = prefs.get('email');
+    if (mail != null) {
+      setState(() {
+        LoggedIn = true;
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     Timer(Duration(seconds: 5), () {
+      print(LoggedIn);
       Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (_) => LoginPage()));
+          context,
+          MaterialPageRoute(
+              builder: (_) => LoggedIn == true ? LandingPage() : LoginPage()));
     });
     _controller = AnimationController(vsync: this);
   }

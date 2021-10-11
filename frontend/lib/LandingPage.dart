@@ -3,7 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:frontend/Widgets/Textfeildwidget.dart';
 import 'dart:math';
-
+import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontend/paintPage.dart';
 
 class LandingPage extends StatefulWidget {
@@ -24,9 +25,14 @@ class _LandingPageState extends State<LandingPage> {
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.redAccent,
       body: SafeArea(
         child: Padding(
           padding: EdgeInsets.all(16.0),
@@ -34,174 +40,138 @@ class _LandingPageState extends State<LandingPage> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Crazy Paint",
-                style: TextStyle(
-                    color: Colors.redAccent,
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.bold),
-              ),
-              Divider(
-                color: Colors.redAccent,
-                thickness: 2,
-                endIndent: 280.w,
-              ),
-              SizedBox(
-                height: 20.h,
-              ),
-              Text(
-                "Join Room",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 30.sp,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2),
-              ),
-              SizedBox(
-                height: 10.h,
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    height: 650.h,
-                    width: 1.w,
-                    color: Colors.redAccent,
+                  SizedBox(
+                    height: 70.h,
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  Center(
+                    child: Text(
+                      "Crazy Paint",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 50.sp,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Center(
+                    child: Text(
+                      'Developed and Designed by Henit Chobisa',
+                      style: TextStyle(color: Colors.white, fontSize: 14.sp),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                  Lottie.asset('Lottie/cube.json'),
+                  customTextFeild(
+                    hintText: "Enter Room ID to join",
+                    obsText: false,
+                    controller: controller,
+                    inputType: TextInputType.text,
+                  ),
+                  SizedBox(
+                    height: 8.h,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 15.w, top: 30.h),
-                        child: customTextFeild(
-                          hintText: "Enter Room ID to join",
-                          obsText: false,
-                          controller: controller,
-                          inputType: TextInputType.text,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 15.h,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 37.w),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                if (controller.text.isNotEmpty) {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) => paintPage(
-                                                roomID: controller.text,
-                                              )));
-                                }
-                              },
-                              child: Container(
-                                height: 50.h,
-                                width: 160.w,
-                                decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(10.r)),
-                                child: Center(
-                                  child: Text(
-                                    "Join",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17.sp,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              width: 20.w,
-                            ),
-                            GestureDetector(
-                              onTap: () {
-                                controller.text = getRandomString(20);
-                              },
-                              child: Container(
-                                height: 50.h,
-                                width: 160.w,
-                                decoration: BoxDecoration(
-                                    color: Colors.blueAccent,
-                                    borderRadius: BorderRadius.circular(10.r)),
-                                child: Center(
-                                  child: Text(
-                                    "Generate",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 17.sp,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: 30.h,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 37.w),
-                        child: Text(
-                          "Instructions to use : ",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20.h,
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 37.w),
+                      GestureDetector(
+                        onTap: () {
+                          if (controller.text.isNotEmpty) {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => paintPage(
+                                          roomID: controller.text,
+                                        )));
+                          }
+                        },
                         child: Container(
-                          width: 350.w,
-                          child: SingleChildScrollView(
+                          height: 50.h,
+                          width: 180.w,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20.r)),
+                          child: Center(
                             child: Text(
-                              "This project is based on the dependencies : Dart, Node Js,Socket IO, MongoDB, firebase and GCP\n\n This project is developed and designed as a non-academic project by Henit Chobisa\n\n Only User's email and photoURL is saved in the backend else nothing\n\n Disassembling the app may result in serious issues\n\n ",
-                              style: TextStyle(color: Colors.white),
+                              "Join",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 17.sp,
+                                  fontWeight: FontWeight.bold),
                             ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 20.w,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          controller.text = getRandomString(20);
+                        },
+                        child: Container(
+                          height: 50.h,
+                          width: 180.w,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20.r)),
+                          child: Center(
+                            child: Text(
+                              "Generate",
+                              style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 17.sp,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(
+                    height: 30.h,
+                  ),
+                ],
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    color: Colors.grey.shade900,
+                    borderRadius: BorderRadius.circular(20.r)),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      top: 8.h, bottom: 8.h, left: 16.w, right: 16.w),
+                  child: Row(
+                    children: [
+                      Text(
+                        auth.currentUser.displayName,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      Spacer(),
+                      Container(
+                        height: 40.h,
+                        width: 40.w,
+                        decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: BorderRadius.circular(20.r)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20.r),
+                          child: Image(
+                            image: NetworkImage(auth.currentUser.photoURL),
+                            fit: BoxFit.cover,
                           ),
                         ),
                       )
                     ],
-                  )
-                ],
-              ),
-              Spacer(),
-              Row(
-                children: [
-                  Text(
-                    auth.currentUser.displayName,
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.bold),
                   ),
-                  Spacer(),
-                  Container(
-                    height: 40.h,
-                    width: 40.w,
-                    decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        borderRadius: BorderRadius.circular(20.r)),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.r),
-                      child: Image(
-                        image: NetworkImage(auth.currentUser.photoURL),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  )
-                ],
+                ),
               ),
             ],
           ),
