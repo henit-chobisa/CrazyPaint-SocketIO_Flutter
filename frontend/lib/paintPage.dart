@@ -52,11 +52,14 @@ class _paintPageState extends State<paintPage> {
   ];
   var APP_ID = '08478a3f085f4cbdb8c246d288dfb81b';
   var Token =
-      '00608478a3f085f4cbdb8c246d288dfb81bIABjGMWvy45HojYGKQFmhreTNJ6zBNjMKErjZ2xugzWF/hw69csAAAAAEACTqYr9QG9kYQEAAQA/b2Rh';
+      '00608478a3f085f4cbdb8c246d288dfb81bIACOHEUIuvXvmNU3YXfoCIDkm7qm2aumNdhqRYmwzgj/VWHTcgkAAAAAEACTqYr9QgRlYQEAAQBABGVh';
 
+  bool micOn = true;
   bool _joined = false;
   int _remoteUid = 0;
   bool _switch = false;
+  RtcEngine engine;
+  bool MicVisible = false;
 
   @override
   void initState() {
@@ -65,12 +68,25 @@ class _paintPageState extends State<paintPage> {
     ConnectIO();
   }
 
+  void turnOffMic() async {
+    await engine.muteLocalAudioStream(true);
+    setState(() {
+      micOn = false;
+    });
+  }
+
+  void turnOnMic() async {
+    await engine.muteLocalAudioStream(false);
+    setState(() {
+      micOn = true;
+    });
+  }
+
   Future<void> initPlatformState() async {
-    // Get microphone permission
     await [Permission.microphone].request();
     // Create RTC client instance
     RtcEngineContext context = RtcEngineContext(APP_ID);
-    var engine = await RtcEngine.createWithContext(context);
+    engine = await RtcEngine.createWithContext(context);
     // Define event handling logic
     engine.setEventHandler(RtcEngineEventHandler(
         joinChannelSuccess: (String channel, int uid, int elapsed) {
@@ -88,10 +104,17 @@ class _paintPageState extends State<paintPage> {
       setState(() {
         _remoteUid = 0;
       });
+    }, tokenPrivilegeWillExpire: (value) {
+      print(value);
+      print('token will expire');
     }));
+
     engine.enableLocalAudio(true);
     // Join channel with channel name as 123
-    await engine.joinChannel(Token, '12345', null, 0);
+    await engine.joinChannel(Token, widget.roomID, null, 0);
+    setState(() {
+      MicVisible = true;
+    });
   }
 
   Color getContigousStatus() {
@@ -159,6 +182,8 @@ class _paintPageState extends State<paintPage> {
 
   @override
   void dispose() {
+    engine.leaveChannel();
+    engine.destroy();
     socket.disconnect();
     socket.dispose();
     pointsStream.close();
@@ -468,10 +493,22 @@ class _paintPageState extends State<paintPage> {
                                   );
                                 }),
                           )),
-                      Icon(
-                        Icons.mic,
-                        color: Colors.black,
-                        size: 40.sp,
+                      Visibility(
+                        visible: MicVisible,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (micOn) {
+                              turnOffMic();
+                            } else {
+                              turnOnMic();
+                            }
+                          },
+                          child: Icon(
+                            micOn ? Icons.mic : Icons.mic_off,
+                            color: Colors.black,
+                            size: 40.sp,
+                          ),
+                        ),
                       )
                     ],
                   ),
