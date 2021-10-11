@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'Classes/DrawingModel.dart';
 import 'Classes/DrawingPainter.dart';
 import 'dart:ui';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -40,6 +43,14 @@ class _paintPageState extends State<paintPage> {
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
   // ignore: close_sinks
+
+  static const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
+
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+
   final userStream = BehaviorSubject<List<UserB>>();
   GlobalKey key = GlobalKey();
   bool contiguous = true;
@@ -51,12 +62,24 @@ class _paintPageState extends State<paintPage> {
     Colors.black
   ];
   var APP_ID = '08478a3f085f4cbdb8c246d288dfb81b';
-  var Token =
-      '00608478a3f085f4cbdb8c246d288dfb81bIABjGMWvy45HojYGKQFmhreTNJ6zBNjMKErjZ2xugzWF/hw69csAAAAAEACTqYr9QG9kYQEAAQA/b2Rh';
-
+  bool soundOn = true;
+  bool micOn = true;
   bool _joined = false;
   int _remoteUid = 0;
   bool _switch = false;
+  RtcEngine engine;
+  bool MicVisible = false;
+  var Token = "";
+
+  Future<void> fetchRtcToken(String channel, int uid, String role) async {
+    print('fetching token');
+    var response = await http.get(Uri.parse(
+        "https://crazypaint.herokuapp.com/getToken?channel=${channel}&uid=${uid}&role=${role}"));
+    var decoded = jsonDecode(response.body);
+    setState(() {
+      Token = decoded['token'];
+    });
+  }
 
   @override
   void initState() {
@@ -65,18 +88,34 @@ class _paintPageState extends State<paintPage> {
     ConnectIO();
   }
 
+  void turnOffMic() async {
+    await engine.muteLocalAudioStream(true);
+    setState(() {
+      micOn = false;
+    });
+  }
+
+  void turnOnMic() async {
+    await engine.muteLocalAudioStream(false);
+    setState(() {
+      micOn = true;
+    });
+  }
+
   Future<void> initPlatformState() async {
-    // Get microphone permission
     await [Permission.microphone].request();
-    // Create RTC client instance
+
     RtcEngineContext context = RtcEngineContext(APP_ID);
-    var engine = await RtcEngine.createWithContext(context);
-    // Define event handling logic
+    engine = await RtcEngine.createWithContext(context);
+    var uid = Random().nextInt(100000);
     engine.setEventHandler(RtcEngineEventHandler(
         joinChannelSuccess: (String channel, int uid, int elapsed) {
       print('joinChannelSuccess ${channel} ${uid}');
       setState(() {
         _joined = true;
+        setState(() {
+          MicVisible = true;
+        });
       });
     }, userJoined: (int uid, int elapsed) {
       print('userJoined ${uid}');
@@ -88,10 +127,18 @@ class _paintPageState extends State<paintPage> {
       setState(() {
         _remoteUid = 0;
       });
+    }, tokenPrivilegeWillExpire: (value) async {
+      print('token will expire');
+      await fetchRtcToken(widget.roomID, uid, 'SUBSCRIBER');
+      await engine.joinChannel(Token, widget.roomID, null, uid);
     }));
+
+    await fetchRtcToken(widget.roomID, uid, 'SUBSCRIBER');
+
     engine.enableLocalAudio(true);
     // Join channel with channel name as 123
-    await engine.joinChannel(Token, '12345', null, 0);
+    print(Token);
+    await engine.joinChannel(Token, widget.roomID, null, uid);
   }
 
   Color getContigousStatus() {
@@ -159,6 +206,8 @@ class _paintPageState extends State<paintPage> {
 
   @override
   void dispose() {
+    engine.leaveChannel();
+    engine.destroy();
     socket.disconnect();
     socket.dispose();
     pointsStream.close();
@@ -434,13 +483,13 @@ class _paintPageState extends State<paintPage> {
                     children: [
                       Container(
                           height: 70.h,
-                          width: 320.w,
+                          width: 280.w,
                           decoration: BoxDecoration(
                             color: Colors.greenAccent,
                             borderRadius: BorderRadius.circular(40.r),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(16.0),
+                            padding: const EdgeInsets.all(16),
                             child: ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -449,14 +498,14 @@ class _paintPageState extends State<paintPage> {
                                   return Padding(
                                     padding: EdgeInsets.only(right: 3.w),
                                     child: Container(
-                                      height: 40.h,
-                                      width: 40.w,
+                                      height: 30.h,
+                                      width: 30.w,
                                       decoration: BoxDecoration(
                                           borderRadius:
-                                              BorderRadius.circular(20.r)),
+                                              BorderRadius.circular(15.r)),
                                       child: ClipRRect(
                                         borderRadius:
-                                            BorderRadius.circular(20.r),
+                                            BorderRadius.circular(15.r),
                                         child: Image(
                                           image: NetworkImage(currentUsers
                                               .elementAt(index)
@@ -468,11 +517,23 @@ class _paintPageState extends State<paintPage> {
                                   );
                                 }),
                           )),
-                      Icon(
-                        Icons.mic,
-                        color: Colors.black,
-                        size: 40.sp,
-                      )
+                      Visibility(
+                        visible: MicVisible,
+                        child: GestureDetector(
+                          onTap: () {
+                            if (micOn) {
+                              turnOffMic();
+                            } else {
+                              turnOnMic();
+                            }
+                          },
+                          child: Icon(
+                            micOn ? Icons.mic : Icons.mic_off,
+                            color: Colors.black,
+                            size: 35.sp,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ],

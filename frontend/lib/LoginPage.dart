@@ -21,7 +21,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final FirebaseAuth auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
   AnimationController _controller;
-  String alert = "Continue wuth google";
+  String alert = "Continue with google";
 
   @override
   void initState() {
