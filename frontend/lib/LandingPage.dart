@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:frontend/Widgets/Textfeildwidget.dart';
 import 'dart:math';
 import 'package:lottie/lottie.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontend/paintPage.dart';
 
 class LandingPage extends StatefulWidget {
@@ -23,6 +23,11 @@ class _LandingPageState extends State<LandingPage> {
 
   String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

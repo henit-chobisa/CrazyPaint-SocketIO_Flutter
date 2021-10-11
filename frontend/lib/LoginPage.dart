@@ -75,15 +75,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       body: SafeArea(
         child: Stack(
           children: [
-            // Container(
-            //   height: MediaQuery.of(context).size.height,
-            //   child: Lottie.asset('Lottie/background.json',
-            //       fit: BoxFit.fitHeight,
-            //       controller: _controller, onLoaded: (composition) {
-            //     _controller.duration = Duration(seconds: 5);
-            //     _controller.forward();
-            //   }),
-            // ),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
