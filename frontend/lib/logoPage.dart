@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/LandingPage.dart';
-import 'package:frontend/paintPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
 
@@ -19,18 +18,22 @@ class _LogoPageState extends State<LogoPage> with TickerProviderStateMixin {
   AnimationController _controller;
   bool LoggedIn = false;
 
-  Future<void> check() async {
+  void check() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var mail = prefs.get('email');
+    print(mail);
     if (mail != null) {
       setState(() {
         LoggedIn = true;
       });
+    } else {
+      print("email doesn't exist");
     }
   }
 
   @override
   void initState() {
+    check();
     super.initState();
     Timer(Duration(seconds: 5), () {
       print(LoggedIn);

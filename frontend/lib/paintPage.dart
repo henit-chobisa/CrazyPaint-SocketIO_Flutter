@@ -147,7 +147,7 @@ class _paintPageState extends State<paintPage> {
     if (contiguous) {
       return Colors.transparent;
     } else {
-      return Colors.white;
+      return Colors.blueGrey.shade200;
     }
   }
 
@@ -294,55 +294,63 @@ class _paintPageState extends State<paintPage> {
       backgroundColor: Colors.black,
       key: key,
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(15.0),
+        padding: EdgeInsets.all(15.sp),
         child: Container(
-            padding: const EdgeInsets.only(left: 8.0, right: 8.0),
+            padding: EdgeInsets.only(left: 8.w, right: 8.w),
             decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50.0), color: Colors.white),
+                borderRadius: BorderRadius.circular(50.r), color: Colors.white),
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: EdgeInsets.all(8.sp),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: <Widget>[
-                      IconButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          icon: Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.black,
-                          )),
-                      IconButton(
-                          icon: Icon(Icons.album),
-                          onPressed: () {
-                            setState(() {
-                              if (selectedMode == SelectedMode.StrokeWidth)
-                                showBottomList = !showBottomList;
-                              selectedMode = SelectedMode.StrokeWidth;
-                            });
-                          }),
-                      IconButton(
-                          icon: Icon(Icons.opacity),
-                          onPressed: () {
-                            setState(() {
-                              if (selectedMode == SelectedMode.Opacity)
-                                showBottomList = !showBottomList;
-                              selectedMode = SelectedMode.Opacity;
-                            });
-                          }),
-                      IconButton(
-                          icon: Icon(Icons.color_lens),
-                          onPressed: () {
-                            setState(() {
-                              if (selectedMode == SelectedMode.Color)
-                                showBottomList = !showBottomList;
-                              selectedMode = SelectedMode.Color;
-                            });
-                          }),
+                      Flexible(
+                        child: IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: Icon(
+                              Icons.arrow_back_ios,
+                              color: Colors.black,
+                            )),
+                      ),
+                      Flexible(
+                        child: IconButton(
+                            icon: Icon(Icons.album),
+                            onPressed: () {
+                              setState(() {
+                                if (selectedMode == SelectedMode.StrokeWidth)
+                                  showBottomList = !showBottomList;
+                                selectedMode = SelectedMode.StrokeWidth;
+                              });
+                            }),
+                      ),
+                      Flexible(
+                        child: IconButton(
+                            icon: Icon(Icons.opacity),
+                            onPressed: () {
+                              setState(() {
+                                if (selectedMode == SelectedMode.Opacity)
+                                  showBottomList = !showBottomList;
+                                selectedMode = SelectedMode.Opacity;
+                              });
+                            }),
+                      ),
+                      Flexible(
+                        child: IconButton(
+                            icon: Icon(Icons.color_lens),
+                            onPressed: () {
+                              setState(() {
+                                if (selectedMode == SelectedMode.Color)
+                                  showBottomList = !showBottomList;
+                                selectedMode = SelectedMode.Color;
+                              });
+                            }),
+                      ),
                       Flexible(
                         child: Container(
                           decoration: BoxDecoration(
@@ -361,92 +369,99 @@ class _paintPageState extends State<paintPage> {
                               icon: Icon(Icons.timeline)),
                         ),
                       ),
-                      IconButton(
-                        onPressed: () {
-                          showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                    backgroundColor: Colors.greenAccent,
-                                    title: Text(
-                                      "Room Information",
-                                      style: TextStyle(
-                                          color: Colors.black, fontSize: 12.sp),
-                                    ),
-                                    content: SingleChildScrollView(
-                                      child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Current Room ID",
-                                            style: TextStyle(
-                                                fontSize: 14.sp,
-                                                color: Colors.black),
-                                          ),
-                                          SizedBox(
-                                            height: 10.h,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              widget.roomID,
-                                              style: TextStyle(
-                                                  fontSize: 12.sp,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black),
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 10.h,
-                                          ),
-                                          Text("User Information",
+                      Flexible(
+                        child: IconButton(
+                          onPressed: () {
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                      backgroundColor: Colors.greenAccent,
+                                      title: Text(
+                                        "Room Information",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 12.sp),
+                                      ),
+                                      content: SingleChildScrollView(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Current Room ID",
                                               style: TextStyle(
                                                   fontSize: 14.sp,
-                                                  color: Colors.black)),
-                                          SizedBox(
-                                            height: 10.h,
-                                          ),
-                                          Container(
-                                            height: 300.h,
-                                            width: double.maxFinite,
-                                            child: ListView.builder(
-                                                scrollDirection: Axis.vertical,
-                                                shrinkWrap: true,
-                                                itemCount: currentUsers.length,
-                                                itemBuilder: (_, index) {
-                                                  print(currentUsers
-                                                      .elementAt(0)
-                                                      .userName);
-                                                  return AttendeeBox(
-                                                    name: currentUsers
-                                                        .elementAt(index)
-                                                        .userName,
-                                                    email: currentUsers
-                                                        .elementAt(index)
-                                                        .email,
-                                                    photoURL: currentUsers
-                                                        .elementAt(index)
-                                                        .photoURL,
-                                                  );
-                                                }),
-                                          )
-                                        ],
+                                                  color: Colors.black),
+                                            ),
+                                            SizedBox(
+                                              height: 10.h,
+                                            ),
+                                            Center(
+                                              child: Text(
+                                                widget.roomID,
+                                                style: TextStyle(
+                                                    fontSize: 12.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              height: 10.h,
+                                            ),
+                                            Text("User Information",
+                                                style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    color: Colors.black)),
+                                            SizedBox(
+                                              height: 10.h,
+                                            ),
+                                            Container(
+                                              height: 300.h,
+                                              width: double.maxFinite,
+                                              child: ListView.builder(
+                                                  scrollDirection:
+                                                      Axis.vertical,
+                                                  shrinkWrap: true,
+                                                  itemCount:
+                                                      currentUsers.length,
+                                                  itemBuilder: (_, index) {
+                                                    print(currentUsers
+                                                        .elementAt(0)
+                                                        .userName);
+                                                    return AttendeeBox(
+                                                      name: currentUsers
+                                                          .elementAt(index)
+                                                          .userName,
+                                                      email: currentUsers
+                                                          .elementAt(index)
+                                                          .email,
+                                                      photoURL: currentUsers
+                                                          .elementAt(index)
+                                                          .photoURL,
+                                                    );
+                                                  }),
+                                            )
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ));
-                        },
-                        icon: Icon(Icons.info_outline),
-                        color: Colors.black,
+                                    ));
+                          },
+                          icon: Icon(Icons.info_outline),
+                          color: Colors.black,
+                        ),
                       ),
-                      IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () {
-                            setState(() {
-                              showBottomList = false;
-                              pointsList.clear();
-                            });
-                          }),
+                      Flexible(
+                        child: IconButton(
+                            icon: Icon(Icons.clear),
+                            onPressed: () {
+                              setState(() {
+                                showBottomList = false;
+                                pointsList.clear();
+                              });
+                            }),
+                      ),
                     ],
                   ),
                   Visibility(
@@ -490,7 +505,8 @@ class _paintPageState extends State<paintPage> {
                             borderRadius: BorderRadius.circular(40.r),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.only(
+                                top: 15.h, bottom: 15.h, left: 10.w),
                             child: ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -499,25 +515,24 @@ class _paintPageState extends State<paintPage> {
                                   return Padding(
                                     padding: EdgeInsets.only(right: 3.w),
                                     child: Container(
-                                      height: 30.h,
-                                      width: 30.w,
                                       decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15.r)),
+                                        shape: BoxShape.circle,
+                                      ),
                                       child: ClipRRect(
                                         borderRadius:
-                                            BorderRadius.circular(15.r),
+                                            BorderRadius.circular(20.r),
                                         child: Image(
                                           image: NetworkImage(currentUsers
                                               .elementAt(index)
                                               .photoURL),
-                                          fit: BoxFit.cover,
+                                          fit: BoxFit.fill,
                                         ),
                                       ),
                                     ),
                                   );
                                 }),
                           )),
+                      Spacer(),
                       Visibility(
                         visible: MicVisible,
                         child: GestureDetector(
