@@ -15,10 +15,11 @@ Router.get('/', nocache, (req, res) => {
     if (query.role == 'publisher'){
         role = RtcRole.PUBLISHER;
     }
-    let expireTime = 10;
+    let expireTime = 36000;
     const currentTime = Math.floor(Date.now()/1000);
     const previlegeExpiryTime = currentTime + expireTime;
     const token = RtcTokenBuilder.buildTokenWithUid(APP_ID, APP_CERTIFICATE, channelName,uid, role, previlegeExpiryTime);
+    console.log(token);
     res.json({'token' : token});
 
 })

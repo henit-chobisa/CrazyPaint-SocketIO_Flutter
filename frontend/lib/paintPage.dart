@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'Classes/DrawingModel.dart';
 import 'Classes/DrawingPainter.dart';
 import 'dart:ui';
 import 'dart:async';
+import 'package:http/http.dart' as http;
 
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -40,6 +43,14 @@ class _paintPageState extends State<paintPage> {
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
   // ignore: close_sinks
+
+  static const _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  Random _rnd = Random();
+
+  String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+
   final userStream = BehaviorSubject<List<UserB>>();
   GlobalKey key = GlobalKey();
   bool contiguous = true;
@@ -51,15 +62,24 @@ class _paintPageState extends State<paintPage> {
     Colors.black
   ];
   var APP_ID = '08478a3f085f4cbdb8c246d288dfb81b';
-  var Token =
-      '00608478a3f085f4cbdb8c246d288dfb81bIACOHEUIuvXvmNU3YXfoCIDkm7qm2aumNdhqRYmwzgj/VWHTcgkAAAAAEACTqYr9QgRlYQEAAQBABGVh';
-
+  bool soundOn = true;
   bool micOn = true;
   bool _joined = false;
   int _remoteUid = 0;
   bool _switch = false;
   RtcEngine engine;
   bool MicVisible = false;
+  var Token = "";
+
+  Future<void> fetchRtcToken(String channel, int uid, String role) async {
+    print('fetching token');
+    var response = await http.get(Uri.parse(
+        "https://crazypaint.herokuapp.com/getToken?channel=${channel}&uid=${uid}&role=${role}"));
+    var decoded = jsonDecode(response.body);
+    setState(() {
+      Token = decoded['token'];
+    });
+  }
 
   @override
   void initState() {
@@ -84,15 +104,18 @@ class _paintPageState extends State<paintPage> {
 
   Future<void> initPlatformState() async {
     await [Permission.microphone].request();
-    // Create RTC client instance
+
     RtcEngineContext context = RtcEngineContext(APP_ID);
     engine = await RtcEngine.createWithContext(context);
-    // Define event handling logic
+    var uid = Random().nextInt(100000);
     engine.setEventHandler(RtcEngineEventHandler(
         joinChannelSuccess: (String channel, int uid, int elapsed) {
       print('joinChannelSuccess ${channel} ${uid}');
       setState(() {
         _joined = true;
+        setState(() {
+          MicVisible = true;
+        });
       });
     }, userJoined: (int uid, int elapsed) {
       print('userJoined ${uid}');
@@ -104,17 +127,18 @@ class _paintPageState extends State<paintPage> {
       setState(() {
         _remoteUid = 0;
       });
-    }, tokenPrivilegeWillExpire: (value) {
-      print(value);
+    }, tokenPrivilegeWillExpire: (value) async {
       print('token will expire');
+      await fetchRtcToken(widget.roomID, uid, 'SUBSCRIBER');
+      await engine.joinChannel(Token, widget.roomID, null, uid);
     }));
+
+    await fetchRtcToken(widget.roomID, uid, 'SUBSCRIBER');
 
     engine.enableLocalAudio(true);
     // Join channel with channel name as 123
-    await engine.joinChannel(Token, widget.roomID, null, 0);
-    setState(() {
-      MicVisible = true;
-    });
+    print(Token);
+    await engine.joinChannel(Token, widget.roomID, null, uid);
   }
 
   Color getContigousStatus() {
@@ -459,7 +483,7 @@ class _paintPageState extends State<paintPage> {
                     children: [
                       Container(
                           height: 70.h,
-                          width: 320.w,
+                          width: 280.w,
                           decoration: BoxDecoration(
                             color: Colors.greenAccent,
                             borderRadius: BorderRadius.circular(40.r),
@@ -506,10 +530,10 @@ class _paintPageState extends State<paintPage> {
                           child: Icon(
                             micOn ? Icons.mic : Icons.mic_off,
                             color: Colors.black,
-                            size: 40.sp,
+                            size: 35.sp,
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ],
