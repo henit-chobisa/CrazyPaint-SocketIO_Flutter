@@ -505,7 +505,8 @@ class _paintPageState extends State<paintPage> {
                             borderRadius: BorderRadius.circular(40.r),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(16),
+                            padding: EdgeInsets.only(
+                                top: 15.h, bottom: 15.h, left: 10.w),
                             child: ListView.builder(
                                 shrinkWrap: true,
                                 scrollDirection: Axis.horizontal,
@@ -514,19 +515,17 @@ class _paintPageState extends State<paintPage> {
                                   return Padding(
                                     padding: EdgeInsets.only(right: 3.w),
                                     child: Container(
-                                      height: 30.h,
-                                      width: 30.w,
                                       decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(15.r)),
+                                        shape: BoxShape.circle,
+                                      ),
                                       child: ClipRRect(
                                         borderRadius:
-                                            BorderRadius.circular(15.r),
+                                            BorderRadius.circular(20.r),
                                         child: Image(
                                           image: NetworkImage(currentUsers
                                               .elementAt(index)
                                               .photoURL),
-                                          fit: BoxFit.cover,
+                                          fit: BoxFit.fill,
                                         ),
                                       ),
                                     ),
