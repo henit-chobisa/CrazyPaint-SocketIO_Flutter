@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key key}) : super(key: key);
@@ -20,14 +19,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   TextEditingController passwordController = TextEditingController();
   final FirebaseAuth auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
-  AnimationController _controller;
   String alert = "Continue with google";
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _controller = AnimationController(vsync: this);
   }
 
   Future<void> saveUserInfo() async {
@@ -45,11 +42,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       alert = "Continue with google";
     });
     if (response.statusCode == 200) {
-      SharedPreferences.setMockInitialValues({});
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      await prefs.setString("email", auth.currentUser.email);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (_) => LandingPage()));
+    } else {
+      setState(() {
+        alert = "Try Again ...";
+      });
     }
   }
 

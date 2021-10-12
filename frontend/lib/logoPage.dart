@@ -2,9 +2,8 @@ import 'dart:async';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/LandingPage.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'LoginPage.dart';
 
 class LogoPage extends StatefulWidget {
@@ -19,15 +18,25 @@ class _LogoPageState extends State<LogoPage> with TickerProviderStateMixin {
   bool LoggedIn = false;
 
   void check() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var mail = prefs.get('email');
-    print(mail);
-    if (mail != null) {
+    // SharedPreferences prefs = await SharedPreferences.getInstance();
+    // var mail = prefs.get('email');
+    // print(mail);
+    // if (mail != null) {
+    //   setState(() {
+    //     LoggedIn = true;
+    //   });
+    // } else {
+    //   print("email doesn't exist");
+    // }
+    FirebaseAuth auth = FirebaseAuth.instance;
+    var currentUser = auth.currentUser;
+    if (currentUser == null) {
+      print("No user");
+    } else {
+      print("user exist");
       setState(() {
         LoggedIn = true;
       });
-    } else {
-      print("email doesn't exist");
     }
   }
 

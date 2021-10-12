@@ -19,9 +19,7 @@ class customTextFeild extends StatelessWidget {
         width: 400.w,
         decoration: BoxDecoration(
             color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
-        child: Padding(
-          padding:
-              EdgeInsets.only(left: 16.w, right: 16.w, top: 5.h, bottom: 5.h),
+        child: Center(
           child: TextField(
             obscureText: obsText,
             controller: controller,
