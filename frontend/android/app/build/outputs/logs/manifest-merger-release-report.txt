@@ -6,7 +6,6 @@ INJECTED from /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /front
 INJECTED from /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/android/app/src/main/AndroidManifest.xml:1:1-41:12
 MERGED from [:agora_rtc_engine] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/agora_rtc_engine/intermediates/library_manifest/release/AndroidManifest.xml:2:1-23:12
 MERGED from [:firebase_auth] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/firebase_auth/intermediates/library_manifest/release/AndroidManifest.xml:2:1-15:12
-MERGED from [:shared_preferences] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/shared_preferences/intermediates/library_manifest/release/AndroidManifest.xml:2:1-7:12
 MERGED from [:permission_handler] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/permission_handler/intermediates/library_manifest/release/AndroidManifest.xml:2:1-7:12
 MERGED from [:google_sign_in] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/google_sign_in/intermediates/library_manifest/release/AndroidManifest.xml:2:1-9:12
 MERGED from [:firebase_core] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/firebase_core/intermediates/library_manifest/release/AndroidManifest.xml:2:1-15:12
@@ -147,8 +146,6 @@ MERGED from [:agora_rtc_engine] /Users/henit_work/Documents/My_Flutter_Projects/
 MERGED from [:agora_rtc_engine] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/agora_rtc_engine/intermediates/library_manifest/release/AndroidManifest.xml:6:5-8:41
 MERGED from [:firebase_auth] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/firebase_auth/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44
 MERGED from [:firebase_auth] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/firebase_auth/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44
-MERGED from [:shared_preferences] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/shared_preferences/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44
-MERGED from [:shared_preferences] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/shared_preferences/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44
 MERGED from [:permission_handler] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/permission_handler/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44
 MERGED from [:permission_handler] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/permission_handler/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44
 MERGED from [:google_sign_in] /Users/henit_work/Documents/My_Flutter_Projects/Crazy Paint /frontend/build/google_sign_in/intermediates/library_manifest/release/AndroidManifest.xml:5:5-44

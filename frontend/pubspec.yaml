@@ -33,7 +33,6 @@ dev_dependencies:
   http:
   firebase_auth:
   google_sign_in:
-  shared_preferences:
   agora_rtc_engine: ^4.0.7
   permission_handler:
 
