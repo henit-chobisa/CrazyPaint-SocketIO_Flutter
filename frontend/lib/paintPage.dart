@@ -43,6 +43,7 @@ class _paintPageState extends State<paintPage> {
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
   TransformationController controller = TransformationController();
+  final ShouldScroll = false;
   // ignore: close_sinks
 
   static const _chars =
@@ -148,6 +149,14 @@ class _paintPageState extends State<paintPage> {
 
   Color getContigousStatus() {
     if (contiguous) {
+      return Colors.transparent;
+    } else {
+      return Colors.blueGrey.shade200;
+    }
+  }
+
+  Color getPinStatus() {
+    if (shouldMove) {
       return Colors.transparent;
     } else {
       return Colors.blueGrey.shade200;
@@ -355,13 +364,18 @@ class _paintPageState extends State<paintPage> {
                             }),
                       ),
                       Flexible(
-                        child: IconButton(
-                            icon: Icon(Icons.push_pin),
-                            onPressed: () {
-                              setState(() {
-                                shouldMove = !shouldMove;
-                              });
-                            }),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: getPinStatus(),
+                              borderRadius: BorderRadius.circular(30)),
+                          child: IconButton(
+                              onPressed: () {
+                                setState(() {
+                                  shouldMove = !shouldMove;
+                                });
+                              },
+                              icon: Icon(Icons.push_pin_outlined)),
+                        ),
                       ),
                       Flexible(
                         child: Container(
@@ -584,7 +598,7 @@ class _paintPageState extends State<paintPage> {
           pointsList.add(model);
           pointsStream.add(pointsList);
           emitCoordinates(TransferModel(
-              dx: details.localPosition.dx,
+              dx: (details.localPosition.dx + scrollController.offset),
               dy: details.globalPosition.dy,
               colorCode: selectedColor.withOpacity(opacity).hashCode,
               StrokeWidth: strokeWidth));
@@ -618,6 +632,9 @@ class _paintPageState extends State<paintPage> {
         },
         child: SingleChildScrollView(
           controller: scrollController,
+          physics: shouldMove == true
+              ? AlwaysScrollableScrollPhysics()
+              : NeverScrollableScrollPhysics(),
           clipBehavior: Clip.antiAlias,
           scrollDirection: Axis.horizontal,
           child: Container(
