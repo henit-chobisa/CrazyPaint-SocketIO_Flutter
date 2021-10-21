@@ -11,6 +11,7 @@ environment:
   sdk: ">=2.11.0 <3.0.0"
 
 dependencies:
+
   json_annotation: ^4.0.0
   flutter:
     sdk: flutter
@@ -33,6 +34,7 @@ dev_dependencies:
   http:
   firebase_auth:
   google_sign_in:
+  firedart:
   agora_rtc_engine: ^4.0.7
   permission_handler:
 

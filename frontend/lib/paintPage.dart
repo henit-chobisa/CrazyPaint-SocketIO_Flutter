@@ -42,6 +42,7 @@ class _paintPageState extends State<paintPage> {
   SelectedMode selectedMode = SelectedMode.StrokeWidth;
   // ignore: close_sinks
   final pointsStream = BehaviorSubject<List<DrawModel>>();
+  TransformationController controller = TransformationController();
   // ignore: close_sinks
 
   static const _chars =
@@ -70,6 +71,8 @@ class _paintPageState extends State<paintPage> {
   RtcEngine engine;
   bool MicVisible = false;
   var Token = "";
+  bool shouldMove = false;
+  ScrollController scrollController = ScrollController();
 
   Future<void> fetchRtcToken(String channel, int uid, String role) async {
     print('fetching token');
@@ -352,6 +355,15 @@ class _paintPageState extends State<paintPage> {
                             }),
                       ),
                       Flexible(
+                        child: IconButton(
+                            icon: Icon(Icons.push_pin),
+                            onPressed: () {
+                              setState(() {
+                                shouldMove = !shouldMove;
+                              });
+                            }),
+                      ),
+                      Flexible(
                         child: Container(
                           decoration: BoxDecoration(
                               color: getContigousStatus(),
@@ -565,14 +577,14 @@ class _paintPageState extends State<paintPage> {
             ..strokeWidth = strokeWidth;
           RenderBox renderBox = context.findRenderObject() as RenderBox;
           DrawModel model = DrawModel(
-              offset: renderBox.globalToLocal(details.globalPosition),
+              offset: renderBox.globalToLocal(
+                  details.globalPosition + Offset(scrollController.offset, 0)),
               paint: paint);
           // emitCoordinates(model);
           pointsList.add(model);
           pointsStream.add(pointsList);
-
           emitCoordinates(TransferModel(
-              dx: details.globalPosition.dx,
+              dx: details.localPosition.dx,
               dy: details.globalPosition.dy,
               colorCode: selectedColor.withOpacity(opacity).hashCode,
               StrokeWidth: strokeWidth));
@@ -585,14 +597,14 @@ class _paintPageState extends State<paintPage> {
             ..strokeWidth = strokeWidth;
           RenderBox renderBox = context.findRenderObject() as RenderBox;
           DrawModel model = DrawModel(
-              offset: renderBox.globalToLocal(details.globalPosition),
+              offset: renderBox.globalToLocal(
+                  details.globalPosition + Offset(scrollController.offset, 0)),
               paint: paint);
           // emitCoordinates(model);
-
           pointsList.add(model);
           pointsStream.add(pointsList);
           emitCoordinates(TransferModel(
-              dx: details.globalPosition.dx,
+              dx: (details.globalPosition.dx + scrollController.offset),
               dy: details.globalPosition.dy,
               colorCode: selectedColor.withOpacity(opacity).hashCode,
               StrokeWidth: strokeWidth));
@@ -604,17 +616,22 @@ class _paintPageState extends State<paintPage> {
           }
           socket.emit('completed', contiguous);
         },
-        child: Container(
-          color: Colors.black,
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: StreamBuilder<List<DrawModel>>(
-              stream: pointsStream,
-              builder: (context, snapshot) {
-                return CustomPaint(
-                  painter: DrawingPainter(pointsList: snapshot.data ?? []),
-                );
-              }),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          clipBehavior: Clip.antiAlias,
+          scrollDirection: Axis.horizontal,
+          child: Container(
+            color: Colors.black,
+            width: 2000.w,
+            height: MediaQuery.of(context).size.height.h,
+            child: StreamBuilder<List<DrawModel>>(
+                stream: pointsStream,
+                builder: (context, snapshot) {
+                  return CustomPaint(
+                    painter: DrawingPainter(pointsList: snapshot.data ?? []),
+                  );
+                }),
+          ),
         ),
       ),
     );
